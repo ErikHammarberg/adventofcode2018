@@ -276,20 +276,40 @@ public class DayTwo {
         var testedChars = new HashSet<Character>();
         for (int i = 0; i < input.length() - 1; i++) {
             char findElem = input.charAt(i);
-            if(!testedChars.add(findElem)) {
+            if (!testedChars.add(findElem)) {
                 continue;
             }
-            String[] splits = input.substring(i + 1).split(String.valueOf(findElem));
-            if (splits.length == 2) {
+            int numMatches = otherCounter(input.substring(i + 1), findElem);
+            if (numMatches == 1) {
                 reply.twos = 1;
-            } else if (splits.length == 3) {
+            } else if (numMatches == 2) {
                 reply.threes = 1;
             }
+
             if (reply.twos == 1 && reply.threes == 1) {
                 return reply;
             }
         }
         return reply;
+    }
+
+    private int countOccurances(String input, char elem) {
+        int counter = 0;
+        int index = 0;
+        while (true) {
+            int newIndex = input.indexOf(elem, index);
+            if (newIndex > index) {
+                counter++;
+                index = newIndex;
+            } else {
+                break;
+            }
+        }
+        return counter;
+    }
+
+    static private int otherCounter(String input, char elem) {
+        return (int) input.chars().mapToObj(i -> (char) i).filter(c -> c == elem).count();
     }
 
     static class AnswerTupple {
