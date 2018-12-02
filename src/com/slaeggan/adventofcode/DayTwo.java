@@ -1,5 +1,6 @@
 package com.slaeggan.adventofcode;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -258,11 +259,12 @@ public class DayTwo {
                 "asgwjcmxrkedihqoutfyivzpmx\n";
         System.out.println(taskOne(rawInput.split("\n")));
 
+        System.out.println(taskTwo(rawInput.split("\n")));
     }
 
     private static int taskOne(String[] inputs) {
-        var register = new BookkeepingTupple();
-        Arrays.stream(inputs).map(DayTwo::twoEquals)
+        var register = new AnswerTupple();
+        Arrays.stream(inputs).map(DayTwo::findTwoAndThreeGroups)
                 .forEach(at ->
                 {
                     register.twos += at.twos;
@@ -271,7 +273,7 @@ public class DayTwo {
         return register.twos * register.threes;
     }
 
-    private static AnswerTupple twoEquals(String input) {
+    private static AnswerTupple findTwoAndThreeGroups(String input) {
         var reply = new AnswerTupple();
         var testedChars = new HashSet<Character>();
         for (int i = 0; i < input.length() - 1; i++) {
@@ -293,19 +295,28 @@ public class DayTwo {
         return reply;
     }
 
-    private int countOccurances(String input, char elem) {
-        int counter = 0;
-        int index = 0;
-        while (true) {
-            int newIndex = input.indexOf(elem, index);
-            if (newIndex > index) {
-                counter++;
-                index = newIndex;
-            } else {
-                break;
+    static private String taskTwo(String[] input) {
+        var theOnes = new ArrayList<String>();
+        for(int i = 0; i < input.length-1; i++) {
+            for (int j = i+1; j < input.length; j++) {
+                var result = findCommon(input[i], input[j]);
+                if (result.length() == (input[i].length() - 1)) {
+                    theOnes.add(result);
+                }
             }
         }
-        return counter;
+        System.out.println("Number of strings found: " + theOnes.size());
+        return theOnes.get(0);
+    }
+
+    static private String findCommon(String left, String right) {
+        var commonStringBuilder = new StringBuilder();
+        for(int i = 0; i < left.length(); i++) {
+            if(left.charAt(i) == right.charAt(i)){
+                commonStringBuilder.append(left.charAt(i));
+            }
+        }
+        return commonStringBuilder.toString();
     }
 
     static private int otherCounter(String input, char elem) {
@@ -317,8 +328,4 @@ public class DayTwo {
         int threes;
     }
 
-    static class BookkeepingTupple {
-        int twos;
-        int threes;
-    }
 }
