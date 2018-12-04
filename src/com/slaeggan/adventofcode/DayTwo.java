@@ -297,8 +297,8 @@ public class DayTwo {
 
     static private String taskTwo(String[] input) {
         var theOnes = new ArrayList<String>();
-        for(int i = 0; i < input.length-1; i++) {
-            for (int j = i+1; j < input.length; j++) {
+        for (int i = 0; i < input.length - 1; i++) {
+            for (int j = i + 1; j < input.length; j++) {
                 var result = findCommon(input[i], input[j]);
                 if (result.length() == (input[i].length() - 1)) {
                     theOnes.add(result);
@@ -311,8 +311,8 @@ public class DayTwo {
 
     static private String findCommon(String left, String right) {
         var commonStringBuilder = new StringBuilder();
-        for(int i = 0; i < left.length(); i++) {
-            if(left.charAt(i) == right.charAt(i)){
+        for (int i = 0; i < left.length(); i++) {
+            if (left.charAt(i) == right.charAt(i)) {
                 commonStringBuilder.append(left.charAt(i));
             }
         }
