@@ -1,6 +1,8 @@
 package com.slaeggan.adventofcode;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class DayThree {
@@ -1295,26 +1297,28 @@ public class DayThree {
                 "#1287 @ 152,94: 10x27\n";
         var worker = new DayThree();
 
-        Arrays.stream(input.split("\n")).map(worker::parseInput).forEach(worker::layPattern);
+        Arrays.stream(input.split("\n")).map(worker::parseInput).forEach(worker::layPatternSecond);
         System.out.println(worker.numDoubleFilled);
+        worker.validSet.forEach(s -> System.out.println("valid id: " + s));
     }
 
     int[][] fabric = new int[1500][1500];
     int numDoubleFilled;
+    Set<Integer> validSet = new HashSet<>();
 
     private ParsedLine parseInput(String input) {
         // #1 @ 49,222: 19x20
-        var patternString = "#\\d+ @ (\\d+),(\\d+): (\\d+)x(\\d+)";
+        var patternString = "#(\\d+) @ (\\d+),(\\d+): (\\d+)x(\\d+)";
         var pattern = Pattern.compile(patternString);
         var matcher = pattern.matcher(input);
         var result = new ParsedLine();
         if (matcher.find()) {
-            result.x = Integer.parseInt(matcher.group(1));
-            result.y = Integer.parseInt(matcher.group(2));
-            result.xlen = Integer.parseInt(matcher.group(3));
-            result.ylen = Integer.parseInt(matcher.group(4));
+            result.id = Integer.parseInt(matcher.group(1));
+            result.x = Integer.parseInt(matcher.group(2));
+            result.y = Integer.parseInt(matcher.group(3));
+            result.xlen = Integer.parseInt(matcher.group(4));
+            result.ylen = Integer.parseInt(matcher.group(5));
         }
-//        System.out.println(result);
         return result;
     }
 
@@ -1322,16 +1326,33 @@ public class DayThree {
         for (int x = input.x; x < input.x + input.xlen; x++) {
             for (int y = input.y; y < input.y + input.ylen; y++) {
                 if (fabric[x][y] >= 0 && ++fabric[x][y] > 1) {
-//                    System.out.println(String.format("x: %d, y: %d, fabric: %d", x, y, fabric[x][y]));
                     numDoubleFilled++;
                     fabric[x][y] = Integer.MIN_VALUE;
                 }
-//                System.out.println(String.format("x: %d, y: %d, fabric: %d", x, y, fabric[x][y]));
             }
         }
     }
 
+    private void layPatternSecond(ParsedLine input) {
+        var overlaps = new HashSet<Integer>();
+        for (int x = input.x; x < input.x + input.xlen; x++) {
+            for (int y = input.y; y < input.y + input.ylen; y++) {
+                if (fabric[x][y] > 0) {
+                    overlaps.add(fabric[x][y]);
+                    overlaps.add(input.id);
+                    numDoubleFilled++;
+                    fabric[x][y] = Integer.MIN_VALUE;
+                } else if (fabric[x][y] == 0) {
+                    validSet.add(input.id);
+                    fabric[x][y] = input.id;
+                }
+            }
+        }
+        validSet.removeAll(overlaps);
+    }
+
     class ParsedLine {
+        int id;
         int x;
         int y;
         int xlen;
@@ -1339,7 +1360,7 @@ public class DayThree {
 
         @Override
         public String toString() {
-            return String.format("x: %d, y: %d, xlen: %d, ylen: %d", x, y, xlen, ylen);
+            return String.format("id: %d, x: %d, y: %d, xlen: %d, ylen: %d", id, x, y, xlen, ylen);
         }
     }
 }
