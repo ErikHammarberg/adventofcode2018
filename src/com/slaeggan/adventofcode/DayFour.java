@@ -1175,9 +1175,7 @@ public class DayFour {
                 guardMap.put(guard.guard, guardList);
             }
             guardList.add(guard);
-
             int sleepTime = sumMap.get(guard.guard) != null ? sumMap.get(guard.guard) : 0;
-
             for(Iterator<Integer> sleep = guard.sleep.iterator(), awake = guard.awake.iterator();
                 sleep.hasNext() && awake.hasNext(); ) {
 
@@ -1219,21 +1217,16 @@ public class DayFour {
         for(var input : inputs) {
             var matcher = Pattern.compile("\\[(\\d+)-(\\d+)-(\\d+) (\\d+):(\\d+)\\] (.+)").matcher(input);
             matcher.find();
-
             var day = new Day();
-
             day.year = Integer.parseInt(matcher.group(1));
             day.month = Integer.parseInt(matcher.group(2));
             day.day = Integer.parseInt(matcher.group(3));
-
             int hour = Integer.parseInt(matcher.group(4));
             int minute = Integer.parseInt(matcher.group(5));
 
             if(hour == 23){
                 day.day +=1;
-//                day.day +=1;
             }
-
             var guard = daySet.get(day);
 
             if(guard == null) {
@@ -1246,17 +1239,14 @@ public class DayFour {
             if (guardMatcher.find()) {
                 guard.guard = Integer.parseInt(guardMatcher.group());
             } else if (message.charAt(0) == 'w') {
-                guard.awake.add(getMinute(hour, minute));
+                guard.awake.add(minute);
             } else {
-                guard.sleep.add(getMinute(hour, minute));
+                guard.sleep.add(minute);
             }
         }
         return daySet;
     }
 
-    private int getMinute(int hour, int minute) {
-            return minute;
-    }
     class Day implements Comparable<Day>{
         int year;
         int month;
@@ -1290,7 +1280,6 @@ public class DayFour {
 
     class Guard {
         int guard;
-
         SortedSet<Integer> awake = new TreeSet();
         SortedSet<Integer> sleep = new TreeSet();
     }
