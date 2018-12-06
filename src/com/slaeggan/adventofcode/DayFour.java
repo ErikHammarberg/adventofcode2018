@@ -5,12 +5,6 @@ import java.util.regex.Pattern;
 
 public class DayFour {
 
-//[1518-10-10 23:52] Guard #2707 begins shift
-//[1518-10-14 00:55] wakes up
-//[1518-07-19 00:42] wakes up
-//[1518-06-16 00:41] falls asleep
-//[1518-03-24 00:57] wakes up
-
     public static void main (String[] args){
         var input = "[1518-08-21 00:39] wakes up\n" +
                 "[1518-08-11 00:56] wakes up\n" +
@@ -1140,19 +1134,83 @@ public class DayFour {
                 "[1518-04-15 00:15] falls asleep\n" +
                 "[1518-08-06 00:13] wakes up\n" +
                 "[1518-08-21 23:50] Guard #3323 begins shift\n" +
-                "[1518-10-11 23:57] Guard #911 begins shift\n";
+                "[1518-10-11 23:57] Guard #911 begins shift";
 
+//        var input = "[1518-11-01 00:00] Guard #10 begins shift\n" +
+//                "[1518-11-01 00:05] falls asleep\n" +
+//                "[1518-11-01 00:25] wakes up\n" +
+//                "[1518-11-01 00:30] falls asleep\n" +
+//                "[1518-11-01 00:55] wakes up\n" +
+//                "[1518-11-01 23:58] Guard #99 begins shift\n" +
+//                "[1518-11-02 00:40] falls asleep\n" +
+//                "[1518-11-02 00:50] wakes up\n" +
+//                "[1518-11-03 00:05] Guard #10 begins shift\n" +
+//                "[1518-11-03 00:24] falls asleep\n" +
+//                "[1518-11-03 00:29] wakes up\n" +
+//                "[1518-11-04 00:02] Guard #99 begins shift\n" +
+//                "[1518-11-04 00:36] falls asleep\n" +
+//                "[1518-11-04 00:46] wakes up\n" +
+//                "[1518-11-05 00:03] Guard #99 begins shift\n" +
+//                "[1518-11-05 00:45] falls asleep\n" +
+//                "[1518-11-05 00:55] wakes up";
         var worker = new DayFour();
 
-        var wokerSet = worker.parseLines(input.split("\n"));
-        wokerSet.values()
+        var workerSet = worker.parseLines(input.split("\n"));
+        var guardList = worker.findGuard(workerSet.values());
+        System.out.println("size " + guardList.size() + " guard " + guardList.get(0).guard);
+        int minute = worker.findMinute(guardList);
+        System.out.println("minute " + minute);
+        System.out.println(minute * guardList.get(0).guard);
     }
 
-    public void findGuardAndMinute(Collection<Guard> guardsShifts) {
-        HashMap<Integer, Integer> sumMap;
+    public List<Guard> findGuard(Collection<Guard> guardsShifts) {
+        HashMap<Integer, ArrayList<Guard>> guardMap = new HashMap<>();
+        HashMap<Integer, Integer> sumMap = new HashMap();
+        Guard maxGuard = null;
+        int maxMinutesSleep = 0;
         for(var guard: guardsShifts){
+            ArrayList<Guard> guardList = guardMap.get(guard.guard);
+            if(guardList == null) {
+                guardList = new ArrayList<>();
+                guardMap.put(guard.guard, guardList);
+            }
+            guardList.add(guard);
+
+            int sleepTime = sumMap.get(guard.guard) != null ? sumMap.get(guard.guard) : 0;
+
+            for(Iterator<Integer> sleep = guard.sleep.iterator(), awake = guard.awake.iterator();
+                sleep.hasNext() && awake.hasNext(); ) {
+
+                sleepTime += awake.next() - sleep.next();
+            }
+            sumMap.put(guard.guard, sleepTime);
+            if(sleepTime > maxMinutesSleep) {
+                maxMinutesSleep = sleepTime;
+                maxGuard = guard;
+            }
+        }
+        return guardMap.get(maxGuard.guard);
+    }
+
+    public int findMinute(List<Guard> guards) {
+        int[] minutes = new int[60];
+        int maxValue = 0;
+        int maxIndex = 0;
+        for(var guard : guards) {
+            for(Iterator<Integer> sleep = guard.sleep.iterator(), awake = guard.awake.iterator();
+                sleep.hasNext() && awake.hasNext(); ) {
+                int sleepit = sleep.next();
+                int awakeit = awake.next();
+                for(int i = sleepit ; i < awakeit ; i++ ) {
+                    if(++minutes[i] > maxValue){
+                        maxIndex = i;
+                        maxValue = minutes[i];
+                    }
+                }
+            }
 
         }
+        return maxIndex;
     }
 
     public  TreeMap<Day, Guard> parseLines(String[] inputs) {
@@ -1173,6 +1231,7 @@ public class DayFour {
 
             if(hour == 23){
                 day.day +=1;
+//                day.day +=1;
             }
 
             var guard = daySet.get(day);
@@ -1182,12 +1241,10 @@ public class DayFour {
                 daySet.put(day, guard);
             }
 
-
             String message = matcher.group(6);
             var guardMatcher = Pattern.compile("\\d+").matcher(message);
             if (guardMatcher.find()) {
                 guard.guard = Integer.parseInt(guardMatcher.group());
-//                guard.awake.add(getMinute(hour, minute));
             } else if (message.charAt(0) == 'w') {
                 guard.awake.add(getMinute(hour, minute));
             } else {
@@ -1198,10 +1255,7 @@ public class DayFour {
     }
 
     private int getMinute(int hour, int minute) {
-        if(hour == 23) {
             return minute;
-        }
-        return minute + 60;
     }
     class Day implements Comparable<Day>{
         int year;
