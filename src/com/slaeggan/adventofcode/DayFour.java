@@ -1155,12 +1155,47 @@ public class DayFour {
 //                "[1518-11-05 00:55] wakes up";
         var worker = new DayFour();
 
-        var workerSet = worker.parseLines(input.split("\n"));
-        var guardList = worker.findGuard(workerSet.values());
+        worker.taskOne(input);
+        worker.taskTwo(input);
+
+    }
+
+    public void taskOne(String input) {
+        var workerSet = parseLines(input.split("\n"));
+        var guardList = findGuard(workerSet.values());
         System.out.println("size " + guardList.size() + " guard " + guardList.get(0).guard);
-        int minute = worker.findMinute(guardList);
+        int minute = findMinute(guardList);
         System.out.println("minute " + minute);
         System.out.println(minute * guardList.get(0).guard);
+    }
+
+    public void taskTwo(String input) {
+        var workerSet = parseLines(input.split("\n"));
+        var guardMap = new HashMap<Integer, int[]>();
+        int maxIndex = 0;
+        int maxValue = 0;
+        int sleepGuard = -1;
+        for(var guard : workerSet.values()) {
+            var minutes = guardMap.get(guard.guard);
+            if(minutes == null) {
+                minutes = new int[60];
+                guardMap.put(guard.guard, minutes);
+            }
+            for(Iterator<Integer> sleep = guard.sleep.iterator(), awake = guard.awake.iterator();
+                sleep.hasNext() && awake.hasNext(); ) {
+                int sleepit = sleep.next();
+                int awakeit = awake.next();
+                for(int i = sleepit ; i < awakeit ; i++ ) {
+                    if(++minutes[i] > maxValue){
+                        maxIndex = i;
+                        maxValue = minutes[i];
+                        sleepGuard = guard.guard;
+                    }
+                }
+            }
+
+        }
+        System.out.println("Answer: " + maxIndex * sleepGuard);
     }
 
     public List<Guard> findGuard(Collection<Guard> guardsShifts) {
