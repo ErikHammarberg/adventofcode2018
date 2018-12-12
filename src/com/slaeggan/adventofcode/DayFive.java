@@ -11,10 +11,22 @@ public class DayFive {
         var list = moreInput.trim().codePoints().mapToObj(c -> String.valueOf((char)c)).collect(Collectors.toList());
         var editableList = new ArrayList<String>(list);
         System.out.println(removePairs(editableList));
+
+        System.out.println("***************");
+        System.out.println(findSecondAnswer(moreInput));
     }
 
     public static int findSecondAnswer(String input ) {
-        return 0;
+        var distinctStream = input.trim().codePoints().mapToObj(c -> String.valueOf((char)c).toLowerCase()).distinct();
+        return distinctStream.mapToInt(s ->
+                        firstTask(input.codePoints()
+                            .mapToObj(c -> String.valueOf((char)c))
+                            .filter(p -> !p.equalsIgnoreCase(s)).collect(Collectors.toList())))
+                .min().orElseThrow(RuntimeException::new);
+    }
+
+    public static int firstTask(List<String> input) {
+        return removePairs(new ArrayList<>(input));
     }
 
     public static int removePairs(List<String> chars ){
